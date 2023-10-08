@@ -40,7 +40,7 @@ export class Frontend extends Construct {
         {
           httpStatus: 403,
           responseHttpStatus: 200,
-          responsePagePath: "./index.html",
+          responsePagePath: "/index.html",
         },
       ],
     });
