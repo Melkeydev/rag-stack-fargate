@@ -17,8 +17,9 @@ type UserStorageDB interface {
 	UpdateUserToken(username, token string) error
 }
 
+// This is where we need to actually pull the table from os.ENV
 const (
-	TABLE_NAME = "user-table-name"
+	TABLE_NAME = "randomshit"
 )
 
 type User struct {
@@ -41,7 +42,7 @@ func NewDynamoDBClient() UserStorageDB {
 
 func (db *DynamoDBClient) GetUser(username string) (*User, error) {
 	result, err := db.db.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String(TABLE_NAME),
+		TableName: aws.String(os.Getenv("TABLE_NAME")),
 		Key: map[string]*dynamodb.AttributeValue{
 			"username": {
 				S: aws.String(username),
@@ -68,7 +69,7 @@ func (db *DynamoDBClient) GetUser(username string) (*User, error) {
 
 func (db *DynamoDBClient) ValidateRefreshToken(username string, refreshToken string) bool {
 	input := &dynamodb.GetItemInput{
-		TableName: aws.String(TABLE_NAME),
+		TableName: aws.String(os.Getenv("TABLE_NAME")),
 		Key: map[string]*dynamodb.AttributeValue{
 			"username": {
 				S: aws.String(username),
@@ -104,7 +105,7 @@ func (db *DynamoDBClient) AddUserToDB(username string, password string, hashedTo
 				S: aws.String(hashedToken),
 			},
 		},
-		TableName: aws.String(TABLE_NAME),
+		TableName: aws.String(os.Getenv("TABLE_NAME")),
 	}
 
 	_, err := db.db.PutItem(item)
