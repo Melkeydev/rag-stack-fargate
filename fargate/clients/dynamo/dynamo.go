@@ -36,7 +36,6 @@ func NewDynamoDBClient() UserStorageDB {
 }
 
 func (db *DynamoDBClient) GetUser(username string) (*User, error) {
-	fmt.Println("this is tableName", os.Getenv("TABLE_NAME"))
 	result, err := db.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(os.Getenv("TABLE_NAME")),
 		Key: map[string]*dynamodb.AttributeValue{

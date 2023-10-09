@@ -1,59 +1,52 @@
 package jwt
 
 import (
+	"context"
+	"fmt"
 	"net/http"
-	"strings"
 
-	"github.com/aws/aws-lambda-go/events"
 	"github.com/golang-jwt/jwt"
 )
 
-func ValidateJWTMiddleware(next func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error)) func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
-	return func(request events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
+func ValidateJWTMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		// the actual logic for our middleware
-		tokenString := extractTokenFromHeader(request.Headers)
+		tokenString := extractTokenFromHeader(r)
 		if tokenString == "" {
-			return events.APIGatewayProxyResponse{Body: "Missing Auth Token", StatusCode: http.StatusUnauthorized}, nil
+			http.Error(w, "Missing Auth Token", http.StatusUnauthorized)
+			return
 		}
 
-		// TODO: move this to env
-		mySigningKey := []byte("randomString")
+		mySigningKey := []byte("randomString") // TODO: move this to a secure storage
 
 		token, err := jwt.ParseWithClaims(tokenString, &MyCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return mySigningKey, nil
 		})
 
 		if err != nil || !token.Valid {
-			return events.APIGatewayProxyResponse{Body: "Invalid or Expired Token", StatusCode: http.StatusUnauthorized}, nil
+			http.Error(w, "Invalid or Expired Token", http.StatusUnauthorized)
+			return
 		}
 
 		claims, ok := token.Claims.(*MyCustomClaims)
 		if !ok {
-			return events.APIGatewayProxyResponse{Body: "Invalid Token or Expired Token", StatusCode: http.StatusUnauthorized}, nil
+			http.Error(w, "Invalid or Expired Token", http.StatusUnauthorized)
+			return
 		}
 
-		request.RequestContext.Authorizer = map[string]interface{}{
-			"username": claims.Username,
-		}
+		// Add claims to request context
+		ctx := r.Context()
+		ctx = context.WithValue(ctx, "username", claims.Username)
+		r = r.WithContext(ctx)
 
-		// once we pass all the logic we will kick off the next function in the chain
-		return next(request)
-	}
+		// Call the next handler/function
+		next.ServeHTTP(w, r)
+	})
 }
 
-// We need to use this inside our middleware when we get the request
-func extractTokenFromHeader(headers map[string]string) string {
-	authHeader, ok := headers["Authorization"]
-
-	if !ok {
-		return ""
-	}
-
-	splitToken := strings.Split(authHeader, "Bearer ")
-	if len(splitToken) != 2 {
-		return ""
-	}
-
-	return splitToken[1]
+func extractTokenFromHeader(r *http.Request) string {
+	bearerToken := r.Header.Get("Authorization")
+	var token string
+	fmt.Sscanf(bearerToken, "Bearer %s", &token)
+	return token
 }

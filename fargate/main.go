@@ -29,6 +29,8 @@ func main() {
 	http.HandleFunc("/", app.HealthCheckHandler)
 	http.HandleFunc("/test", app.TestHandler)
 	http.HandleFunc("/register", app.RegisterHandler)
+	http.HandleFunc("/refresh", app.RefreshHandler)
+	http.Handle("/protected", ragJWT.ValidateJWTMiddleware(http.HandlerFunc(app.ProtectedHandler)))
 
 	port := ":8080"
 	fmt.Printf("Server listening on port %s\n", port)
