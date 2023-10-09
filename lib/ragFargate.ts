@@ -9,10 +9,10 @@ export class RagStackFargate extends Stack {
     super(scope, id, props);
 
     const backend = new Backend(this, "Backend", {
-      domainName: "*.devhouse.dev",
-      aRecordName: "server.devhouse.dev",
-      hostedZoneId: "Z00960303IO6O2SU42RW5",
-      hostedZoneName: "devhouse.dev",
+      domainName: "*.example.com",
+      aRecordName: "server.example.com",
+      hostedZoneId: "YOUR_HOSTED_ZONE_ID",
+      hostedZoneName: "example.com",
     });
 
     const frontend = new Frontend(this, "Frontend", { apiUrl: backend.apiUrl });
