@@ -71,7 +71,7 @@ func (app *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Validate if the user already exists in DynamoDB
 	_, err = app.db.GetUser(registerRequest.Username)
-	if err != nil {
+	if err == nil {
 		log.Printf("User already exists in DB %v", err)
 		http.Error(w, "User already exists", http.StatusConflict)
 		return

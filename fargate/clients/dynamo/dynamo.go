@@ -17,11 +17,6 @@ type UserStorageDB interface {
 	UpdateUserToken(username, token string) error
 }
 
-// This is where we need to actually pull the table from os.ENV
-const (
-	TABLE_NAME = "randomshit"
-)
-
 type User struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
@@ -41,6 +36,7 @@ func NewDynamoDBClient() UserStorageDB {
 }
 
 func (db *DynamoDBClient) GetUser(username string) (*User, error) {
+	fmt.Println("this is tableName", os.Getenv("TABLE_NAME"))
 	result, err := db.db.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(os.Getenv("TABLE_NAME")),
 		Key: map[string]*dynamodb.AttributeValue{

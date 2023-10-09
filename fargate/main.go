@@ -28,6 +28,7 @@ func main() {
 
 	http.HandleFunc("/", app.HealthCheckHandler)
 	http.HandleFunc("/test", app.TestHandler)
+	http.HandleFunc("/register", app.RegisterHandler)
 
 	port := ":8080"
 	fmt.Printf("Server listening on port %s\n", port)
