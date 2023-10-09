@@ -1,6 +1,7 @@
 # Welcome to Rag Stack Fargate Service
 
 This is an example of an end-to-end stack that uses React, AWS and Go for a fully scalable and hosted applicaton
+This stacks comes with middleware, protected routes, logging in and registering users to a Dynamo Database.
 
 This stack consists of:
 
